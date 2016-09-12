@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="">
+	<head>
+	 	<!-- Required meta tags always come first -->
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Title Page</title>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<!-- Libs -->
+		<link rel="stylesheet" href="libs/semantic/semantic.min.css">
+
+		<link rel="stylesheet" href="style/main.css">
+	</head>
+	<body onload="init()">
+		<div class="ui left vertical inverted sidebar labeled icon menu">
+		  <a class="item active">
+		    <i class="block layout icon"></i>
+		    Rich Text
+		  </a>
+		  <a class="item">
+		    <i class="smile icon"></i>
+		    Friends
+		  </a>
+		</div>
+		<div class="pusher" id="main-page">
+			<div class="ui secondary  menu">
+			  <button class="ui active button" id="menu-toggle">
+			     <i class="bars icon"></i>
+			      MediPad
+			   </button>
+			  <div class="container">
+				  <div class="right menu">
+				    <a class="ui item">
+				      Signin
+				    </a>
+				    <a class="ui item" id="exportPDF">
+				      Export
+				    </a>
+			  </div>
+			  </div>
+			</div>
+			<div class="container" >
+				<div class="ui blue segment">
+					<textarea id="my-textarea"></textarea>
+					<!-- <div id="firepad" data-dock-parent="#main-page" ></div> -->
+					<div class="ui dimmer" id="firepad-loader">
+					    <div class="ui loader" ></div>
+					  </div>
+				</div>
+			</div>
+		</div>
+		
+		
+
+		
+
+
+
+
+
+
+		<!-- jQuery -->
+		<script   src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+		<!-- Libs -->
+		<script src="libs/semantic/semantic.min.js"></script>
+		<script src="libs/jsPDF/jspdf.js"></script>
+		<script src="libs/tinymce/tinymce.min.js"></script>
+		<!-- Firebase -->
+		<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+		<!-- CodeMirror -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/javascript/javascript.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.css" />
+		<!-- Firepad -->
+		<link rel="stylesheet" href="https://cdn.firebase.com/libs/firepad/1.4.0/firepad.css" />
+		<script src="https://cdn.firebase.com/libs/firepad/1.4.0/firepad.min.js"></script>
+		
+		<script src="js/main.js"></script>
+		
+		<script>
+			$(document).ready(function(){
+			});
+			tinymce.init({ selector:'#my-textarea' });
+			function init() {
+		      // Initialize Firebase.
+		      // TODO: replace with your Firebase project configuration.
+			  firebase.initializeApp(FIREBASE_CONFIG);
+
+		      // Get Firebase Database reference.
+		      var firepadRef = getFirePadExampleRef();
+
+		      // Create CodeMirror (with lineWrapping on).
+		      var codeMirror = CodeMirror.fromTextArea(document.getElementById("my-textarea"));
+
+		      // Create Firepad (with rich text toolbar and shortcuts enabled).
+		      var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, {
+		        richTextShortcuts: true,
+		        richTextToolbar: true
+		      });
+		      firepad.on('ready', function() {
+		      		if (firepad.isHistoryEmpty()) {
+			          firepad.setHtml(
+			              '<span style="font-size: 24px;">Rich-text editing with <span style="color: red">Firepad!</span></span><br/>\n' +
+			              '<br/>' +
+			              '<div style="font-size: 18px">' +
+			              'Supports:<br/>' +
+			              '<ul>' +
+			                '<li>Different ' +
+			                  '<span style="font-family: impact">fonts,</span>' +
+			                  '<span style="font-size: 24px;"> sizes, </span>' +
+			                  '<span style="color: blue">and colors.</span>' +
+			                '</li>' +
+			                '<li>' +
+			                  '<b>Bold, </b>' +
+			                  '<i>italic, </i>' +
+			                  '<u>and underline.</u>' +
+			                '</li>' +
+			                '<li>Lists' +
+			                  '<ol>' +
+			                    '<li>One</li>' +
+			                    '<li>Two</li>' +
+			                  '</ol>' +
+			                '</li>' +
+			                '<li>Undo / redo</li>' +
+			                '<li>Cursor / selection synchronization.</li>' +
+			                '<li><checkbox></checkbox> It supports customized entities.</li>' +
+			                '<li>And it\'s all fully collaborative!</li>' +
+			              '</ul>' +
+			              '</div>');
+			        }
+				  $('#firepad-loader').removeClass('active');
+				  // firepad.dispose();
+				});
+		      firepad.on('synced', function(isSynced) {
+				  // isSynced will be false immediately after the user edits the pad,
+				  // and true when their edit has been saved to Firebase.
+
+				});
+		      $('#exportPDF').click(function(){
+		      		console.log(tinymce.activeEditor.selection.getContent({format: 'text'}));
+					// exportHTMLToPDF(firepad);
+				})
+		    }
+		</script>
+	</body>
+</html>
